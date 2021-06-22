@@ -1,8 +1,8 @@
-#include "input.h"
+#include "rarc.h"
 #include "kata.h"
 #include "castsize.h"
 
-input::~input()
+rarc::~rarc()
 {
 	delete[] directoryna;
 	delete[] fileentrya;
@@ -10,25 +10,25 @@ input::~input()
 	delete filedata;
 }
 
-void input::directoryf()
+void rarc::directoryf()
 {
 	count[0] = (int)bytest((char*)&heder.a[8][0], 4);
 	directoryna = new directoryn[count[0]];
 }
 
-void input::fileentryf()
+void rarc::fileentryf()
 {
 	count[1] = (int)bytest((char*)&heder.a[10][0], 4);
 	fileentrya = new fileentry[count[1]];
 }
 
-void input::filenamef()
+void rarc::filenamef()
 {
 	count[2] = (int)bytest((char*)&heder.a[13][0], 4) + 0x20;
 	filenamea = new char[count[2]];
 }
 
-void input::filedataf()
+void rarc::filedataf()
 {
 	count[3] = (int)bytest((char*)&heder.a[4][0], 4) + 0x20;
 	filedata = new char[count[3]];

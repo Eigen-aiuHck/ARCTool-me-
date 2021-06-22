@@ -24,7 +24,7 @@
     <ClCompile Include="main.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="input.cpp">
+    <ClCompile Include="rarc.cpp">
       <Filter>ソース ファイル\header</Filter>
     </ClCompile>
   </ItemGroup>
@@ -38,7 +38,7 @@
     <ClInclude Include="castsize.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="input.h">
+    <ClInclude Include="rarc.h">
       <Filter>ヘッダー ファイル\class</Filter>
     </ClInclude>
   </ItemGroup>

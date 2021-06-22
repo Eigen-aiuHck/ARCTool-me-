@@ -140,11 +140,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="input.cpp" />
+    <ClCompile Include="rarc.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="class.h" />
-    <ClInclude Include="input.h" />
+    <ClInclude Include="rarc.h" />
     <ClInclude Include="kata.h" />
     <ClInclude Include="castsize.h" />
   </ItemGroup>

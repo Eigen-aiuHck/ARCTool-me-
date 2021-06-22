@@ -1,7 +1,7 @@
 #pragma once
 #include "kata.h"
 #include "castsize.h"
-class input
+class rarc
 {
 private:
 	header heder;
@@ -16,6 +16,6 @@ public:
 	void fileentryf();
 	void filenamef();
 	void filedataf();
-	input();
-	~input();
+	rarc();
+	~rarc();
 };
