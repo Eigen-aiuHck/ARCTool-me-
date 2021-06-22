@@ -16,21 +16,30 @@
     <Filter Include="ヘッダー ファイル\class">
       <UniqueIdentifier>{cb264328-b76c-416b-b132-1adf618052e8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ソース ファイル\header">
+      <UniqueIdentifier>{0af5061e-0e7a-46db-8584-272e186cdd7c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
       <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="input.cpp">
+      <Filter>ソース ファイル\header</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="class.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="input.h">
-      <Filter>ヘッダー ファイル\class</Filter>
-    </ClInclude>
     <ClInclude Include="kata.h">
       <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="castsize.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="input.h">
+      <Filter>ヘッダー ファイル\class</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

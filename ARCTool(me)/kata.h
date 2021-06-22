@@ -1,18 +1,18 @@
 #pragma once
 struct header
 {
-	unsigned long a[16];
+	unsigned char a[16][4];
 };
 
-struct directorynode
+struct directoryn
 {
-	unsigned long a[2];
-	unsigned short b[2];
-	unsigned long c;
+	unsigned char a[2][4];
+	unsigned char b[2][2];
+	unsigned char c[4];
 };
 
 struct fileentry
 {
-	unsigned short a[4];
-	unsigned long b[3];
+	unsigned char a[4][2];
+	unsigned char b[3][4];
 };
