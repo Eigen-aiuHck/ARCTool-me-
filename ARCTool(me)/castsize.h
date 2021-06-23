@@ -1,5 +1,4 @@
 #pragma once
-#include "kata.h"
 
 class bytest
 {
@@ -7,11 +6,11 @@ class bytest
 	int count;
 public:
 	operator int();
-	bytest(char b[],int c);
+	bytest(char* b, int c);
 	~bytest();
 };
 
-bytest::bytest(char b[], int c)
+bytest::bytest(char* b, int c)
 {
 	count = c;
 	a = new char[c];
@@ -27,7 +26,7 @@ bytest::operator int()
 	int re = 0;
 	for (int i = 0; i < count; i++)
 	{
-		re += a[i] << i * 8;
+		re += a[i] << (3 - i) * 8;
 	}
 	return re;
 }
