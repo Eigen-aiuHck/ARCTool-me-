@@ -1,198 +1,182 @@
+#include "rarc.h"
 #include <iostream>
 #include <fstream>
-#include <direct.h>
 #include <string>
-#include <filesystem>
-#include "rarc.h"
-#include "castsize.h"
 
-//public
-
-rarc::rarc(char* filename)
+int rarc::c2i(char *a)
 {
-	if (filename == "")
-	{
-		return;
-	}
-
-	if (std::strcmp(std::strrchr(filename,'.'),".arc") == 0)
-	{
-		std::cout << "Enter file name." << std::endl;
-		std::cin >> rarc::filename;
-		fopen();
-	}
-	else{
-			//directory
-		rarc::filename = filename;
-		pkfile();
-	}
+	return *(int*)a;
 }
 
-int rarc::fopen(char* filename)
+unsigned short rarc::hashcal(char *name)
 {
-	rarc::filename = filename;
-	return fopen();
+	int i = 0;
+	unsigned short hashval = 0;
+
+	while (name[i] != '\0')
+	{
+		hashval *= 3;
+		hashval += name[i];
+		i++;
+	}
+
+	return hashval;
 }
 
-int rarc::fopen()
+rarc::rarc(char *name)
 {
-	char fh[4];
+	if (!inputrarc(name))std::cout << "Can't load file!!\n";
+}
 
-	std::fstream rarcfile(filename, std::ios::binary);
+bool rarc::inputrarc(char *name)
+{
+	int seekval;
 
-	if (!rarcfile)
+	std::ifstream read(name, std::ios::binary);
+	if (!read) {
+		std::cout << "Error: Can't open  file.\n";
+		return 1;
+	}
+	
+	read.seekg(std::ios_base::beg);
+	read.read((char*)&header, headersize);
+	
+	seekval = header.dinoffs + 0x20;
+	read.seekg(seekval, std::ios_base::beg);
+	for (int i = 0; i < header.dinnumb; i++)
 	{
-		std::cout << "Can't open file!!" << std::endl;
-		return -1;
+		read.read((char*)direnode[i].folname, sizeof(int));
+		read.read((char*)direnode[i].strnaof, sizeof(int));
+		read.read((char*)direnode[i].namehash, sizeof(short));
+		read.read((char*)direnode[i].entnumb, sizeof(short));
+		read.read((char*)direnode[i].filoffs, sizeof(int));
 	}
 
-	rarcfile.read(headera, sizeof(headera));
-
-	strcpy_s(fh,4,headera);
-	if (strcmp(fh, "RARC") == 0)
+	seekval = header.fleoffs + 0x20;
+	read.seekg(seekval, std::ios_base::beg);
+	for (int i = 0; i < header.flenumb; i++)
 	{
-		std::cout << "This is not RARC file!" << std::endl;
-		return -2;
+		read.read((char*)fileentry[i].fileid, sizeof(short));
+		read.read((char*)fileentry[i].namehash, sizeof(short));
+		read.read((char*)fileentry[i].type, sizeof(short));
+		read.read((char*)fileentry[i].strnaof, sizeof(short));
+		read.read((char*)fileentry[i].index, sizeof(int));
+		read.read((char*)fileentry[i].size, sizeof(int));
+		read.read((char*)fileentry[i].uk, sizeof(int));
 	}
 
-	sectionset();
+	seekval = header.stroffs + 0x20;
+	read.seekg(seekval, std::ios_base::beg);
+	read.read(&string[0], string.size());
 
-	int* x;
-	x = new int;
-
-	*x = 0x20 + bytest(&headera[0x24], 4);
-	rarcfile.seekp(*x, std::ios::beg);
-	for (int i = 0; i < count[0]; i++)rarcfile.read((char*)&directoryna[i], sizeof(directoryna[0]));
-
-	*x = 0x20 + bytest(&headera[0x2c], 4);
-	rarcfile.seekp(*x, std::ios::beg);
-	for (int i = 0; i < count[0]; i++)rarcfile.read((char*)&fileentrya[i], sizeof(fileentrya[0]));
-
-	*x = 0x20 + bytest(&headera[0x34], 4);
-	rarcfile.seekp(*x, std::ios::beg);
-	for (int i = 0; i < count[0]; i++)rarcfile.read(&stringa[i], sizeof(char));
-
-	*x = 0x20 + bytest(&headera[0x0c], 4);
-	rarcfile.seekp(*x, std::ios::beg);
-	for (int i = 0; i < count[0]; i++)rarcfile.read(&filedata[i], sizeof(char));
-
-	rarcfile.close();
+	seekval = header.fidsize + 0x20;
+	read.seekg(seekval, std::ios_base::beg);
+	read.read(&data[0], data.size());
 
 	return 0;
 }
 
-int rarc::fwrite(char* filename)
+bool rarc::outputrarc(char *name)
 {
-	std::ofstream rarcfile(filename, std::ios::binary);
+	int seekval;
 
-	if (!rarcfile)
-	{
-		std::cout << "Can't open file!!" << std::endl;
-		return -1;
+	std::ofstream write(name, std::ios::binary);
+	if (!write) {
+		std::cout << "Error: Can't open file.\n";
+		return 1;
 	}
 
-	rarcfile.clear();
-
-	rarcfile.write(headera, sizeof(headera));
+	write.seekp(std::ios_base::beg);
+	write.write((char*)&header, headersize);
 	
-	int* x;
-	x = new int;
-
-	*x = 0x20 + bytest(&headera[0x24], 4);
-	rarcfile.seekp(*x, std::ios::beg);
-	for (int i = 0; i < count[0]; i++)rarcfile.write((char*)&directoryna[i], sizeof(directoryna[0]));
-
-	*x = 0x20 + bytest(&headera[0x2c], 4);
-	rarcfile.seekp(*x, std::ios::beg);
-	for (int i = 0; i < count[1]; i++)rarcfile.write((char*)&fileentrya[i], sizeof(fileentrya[0]));
-
-	*x = 0x20 + bytest(&headera[0x34], 4);
-	rarcfile.seekp(*x, std::ios::beg);
-	for (int i = 0; i < count[2]; i++)rarcfile.write(&stringa[i], sizeof(char));
-
-	*x = 0x20 + bytest(&headera[0x0c], 4);
-	rarcfile.seekp(*x, std::ios::beg);
-	for (int i = 0; i < count[3]; i++)rarcfile.write(&filedata[i], sizeof(char));
-
-	int a = rarcfile.fail();
-	rarcfile.close();
-
-	return a;
-}
-
-int rarc::pkfile()
-{
-	const int add = 1;
-
-	const char* b;
-
-	for (const auto& entry : std::filesystem::directory_iterator(filename))
+	seekval = header.dinoffs + 0x20;
+	write.seekp(seekval, std::ios_base::beg);
+	for (int i = 0; i < header.dinnumb; i++)
 	{
-		const std::string a = entry.path().string();
-
-		b = (char*)std::strrchr(a.c_str(), '/');
-
-			//Directory or file check. And create file secsion.
-		if (std::filesystem::is_directory(entry.path()))
-		{	
-			strcpy_s(&filename[0x20], 4, casen((const char*)&add, sizeof(4)));
-
-
-		}
-		else {
-			strcpy_s(&filename[0x28], 4, casen((const char*)&add, sizeof(4)));
-		}
-		
-		for (int i = 0; i < sizeof(b); i++)stringa.push_back(b[i]);
+		write.write((char*)direnode[i].folname, sizeof(int));
+		write.write((char*)direnode[i].strnaof, sizeof(int));
+		write.write((char*)direnode[i].namehash, sizeof(short));
+		write.write((char*)direnode[i].entnumb, sizeof(short));
+		write.write((char*)direnode[i].filoffs, sizeof(int));
 	}
+
+	seekval = header.fleoffs + 0x20;
+	write.seekp(seekval, std::ios_base::beg);
+	for (int i = 0; i < header.flenumb; i++)
+	{
+		write.write((char*)fileentry[i].fileid, sizeof(short));
+		write.write((char*)fileentry[i].namehash, sizeof(short));
+		write.write((char*)fileentry[i].type, sizeof(short));
+		write.write((char*)fileentry[i].strnaof, sizeof(short));
+		write.write((char*)fileentry[i].index, sizeof(int));
+		write.write((char*)fileentry[i].size, sizeof(int));
+		write.write((char*)fileentry[i].uk, sizeof(int));
+	}
+
+	seekval = header.stroffs + 0x20;
+	write.seekp(seekval, std::ios_base::beg);
+	write.write(&string[0], string.size());
+
+	seekval = header.fidsize + 0x20;
+	write.seekp(seekval, std::ios_base::beg);
+	write.write(&data[0], data.size());
+
+	return 0;
 }
 
-int rarc::upkfile(char* filename)
+bool rarc::addfile(char* name, int dir)
 {
-
-}
-
-//protected
-
-void rarc::sectionset()
-{
-	directoryf();
-	fileentryf();
-	stringf();
-	filedataf();
-}
-
-	//4 code at under resemble.
-
-void rarc::directoryf()
-{
-	count[0] = (int)bytest(&headera[0x20], 4);
-}
-
-void rarc::fileentryf()
-{
-	count[1] = (int)bytest(&headera[0x28], 4);
-}
-
-void rarc::stringf()
-{
-	count[2] = (int)bytest(&headera[0x30], 4);
-}
-
-void rarc::filedataf()
-{
-	count[3] = (int)bytest(&headera[0x10], 4);
-}
-
-rarc::casen::casen(const char* a, const int size)
-{
-	b = new char[size];
-
-	for (int i = 0; i < size; i++)b[i] = a[size - 1 - i];
-}
+	char* namep;
+	unsigned short stringp;
+	unsigned int namebeg = 0;
+	int filesize;
+	int fileover;
+	unsigned int datap;
+	unsigned short fienp;
 
 
-void rarc::addfileS()
-{
+	std::ifstream addfile(name, std::ios::binary);
+	if (!addfile)
+	{
+		std::cout << "Error: Can not input file!\n";
+		return 1;
+	}
 
+	//file name add to rarc::string
+	stringp = string.size();
+	for(namebeg = std::strlen(name); name[namebeg] != '/'; namebeg--);
+	for(int i = 0; i < namebeg; i++)
+	{
+		string.push_back(name[i + namebeg]);
+	}
+	namep = &name[namebeg];
+
+	//add entrys.
+	header.dinnumb += 1;
+	header.flenumb += 1;
+
+	direnode[dir].entnumb =+ 1;
+
+	//add file data
+	datap = data.size();
+
+	addfile.seekg(0, std::ios::end);
+	filesize = addfile.tellg();
+	addfile.seekg(0, std::ios::beg);
+	filesize = filesize - addfile.tellg();
+	for(int i = 0; i < filesize; i++)  //I think the other code is a better.
+	{
+		char s;
+		addfile.read(&s, sizeof(char));
+		data.push_back(s);
+	}
+	
+	fileover = filesize % 4;
+
+	if(fileover != 0)for(int i = 0; i < fileover; i++)data.push_back((char)0x00); //Align the edges to 32 bits.
+
+	//add file ent
+	fienp = fileentry.size();
+	fileentry.resize(fienp + 1);
+	fileentry[fienp] = {fienp,hashcal(namep),0x0200,stringp,datap,(unsigned int)(data.size() + 1 - datap),0x00000000};
 }

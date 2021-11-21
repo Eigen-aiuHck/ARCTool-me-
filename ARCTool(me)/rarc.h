@@ -1,47 +1,71 @@
 #pragma once
 #include <vector>
-#include "castsize.h"
+
+#define headersize 64
+
+//default int size is 32bit.
+
 class rarc
 {
-private:
-	char* filename;
-	char headera[0x40] = { 0 };
-	std::vector<char[0x10]> directoryna;
-	std::vector<char[0x14]> fileentrya;
-	std::vector<char> stringa;
-	std::vector<char> filedata;
-	int count[4] = { 0,0,0,0 };
+	struct headerbase {
+		int magic;
+		int size;
+		int uk;
+		int fidoffs;
+		int fidsize;
+		int fidsize2;
+		int uk1;
+		int uk2;
+		int dinnumb;
+		int dinoffs;
+		int flenumb;
+		int fleoffs;
+		int strsize;
+		int stroffs;
+		int uk3;
+		int padding;
+	};
+	struct dirnodebase
+	{
+		int folname;
+		int strnaof;
+		unsigned short namehash;
+		unsigned short entnumb;
+		int filoffs;
+	};
+	struct filentrybase
+	{
+		unsigned short fileid;
+		unsigned short namehash;
+		unsigned short type;
+		unsigned short strnaof;
+		unsigned int index;
+		unsigned int size;
+		unsigned int uk;
+	};
+	headerbase header;
+	std::vector<dirnodebase> direnode;
+	std::vector<filentrybase> fileentry;
+	std::vector<char> string;
+	std::vector<char> data;
 
 protected:
-	void sectionset();
+	int c2i(char *a);
+	unsigned short hashcal(char *name);
 
-	void directoryf();
-	void fileentryf();
-	void stringf();
-	void filedataf();
-
-	class casen
-	{
-	private:
-		char* b;
-	public:
-		casen(const char* a, const int size);
-		operator char* () { return b; };
-	};
-
-	void addfileS();
 public:
-	//base
-	rarc();
-	rarc(char* filename);
+	rarc(char *name);
 
-	//ëÄçÏ
-	int fopen();
-	int fopen(char* filenam);
-	int fwrite(char* filename);
-	int view();
-	int pkfile();
-	int upkfile(char* filename);
+	bool inputrarc(char *name);
+	bool outputrarc(char *name);
 
-	//äeçÄñ⁄ÇÃèoóÕ
+	bool addfile(char *name, int dir);
+	bool addfilenull(char *name, int dir);
+	bool delfile(char *name, int dir);
+
+	bool adddir(char *name, int dir);
+	bool deldir(char *name, int dir);
+
+	bool rename(char *name, int dir, char *newname);
+
 };
