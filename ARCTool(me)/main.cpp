@@ -1,13 +1,30 @@
 #include <iostream>
-#include <fstream>
+#include "rarc.h"
 
-int main(int stcount,const char* stringcl)
+#define int_32 std::int32_t
+#define uint_32 std::int32_t
+
+int main(int argc, char* argv[])
 {
-	std::fstream a(stringcl, std::ios::binary);
+	if (argc == NULL)
+	{
+		std::printf("Command is rarc, if you want a option \"-hellp\" or \"-h\".");
+		return NULL;
+	}
 
-	a.write(stringcl,sizeof(&stringcl[0]));
 
-	a.close();
+	if (argv[1] == "-help" || argv[1] == "-h")
+	{
+		std::cout << "rarc \<command\>\n	-pac \"directory name\" \"compression file\"\n		compless file.\n	-upac \"package name\" \"decompression folder\"\n		decompress file.\n";
+	}
+	else if (argv[1] == "-pac")
+	{
 
-	return 0;
+	}
+	else
+	{
+		std::printf("Command is rarc, if you want a option \"-hellp\" or \"-h\".");
+		return NULL;
+	}
+
 }
