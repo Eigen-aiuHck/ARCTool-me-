@@ -150,7 +150,6 @@ bool rarc::addfile(char *name, int32 dir)
 	namep = &name[namebeg];
 
 	//add entrys.
-	header.dinnumb += 1;
 	header.flenumb += 1;
 
 	direnode[dir].entnumb =+ 1;
@@ -183,5 +182,6 @@ bool rarc::addfile(char *name, int32 dir)
 
 bool rarc::adddir(char *name, int32 dir)
 {
-
+	int32 nowdircount = 0;
+	for(/* Declare the type */;direnode[nowdircount].folname <= dir;nowdircount++);
 }
